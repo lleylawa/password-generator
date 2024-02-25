@@ -1,73 +1,75 @@
 #include <iostream>
+#include <cstdlib>
+#include <ctime>
 #include <string>
-#include <random>
-
 using namespace std;
 
-// Function to generate a random password
-string generatePassword(int minLength, int maxLength, string charSet) {
-    // Random number generator setup
-    random_device rd;
-    mt19937 generator(rd());
-    // Distribution for selecting password length
-    uniform_int_distribution<> lengthDist(minLength, maxLength);
-    // Distribution for selecting characters from the character set
-    uniform_int_distribution<> charDist(0, charSet.size() - 1);
+// Function to generate a random string based on user preferences
+string generateRandomString(int length, bool includeDigits, bool includeLetters, bool includeSymbols) {
+    string randomString; // Initialize an empty string to hold the generated password
+    string charSet = ""; // Initialize an empty string to store the character set to be used
 
-    // Generate random password length within the specified range
-    int passwordLength = lengthDist(generator);
-    string password;
-
-    // Construct the password by randomly selecting characters from the character set
-    for (int i = 0; i < passwordLength; ++i) {
-        password += charSet[charDist(generator)];
+    // Append characters to the character set based on user preferences
+    if (includeDigits)
+        charSet += "0123456789"; // Include digits if requested
+    if (includeLetters) {
+        charSet += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; // Include letters if requested
     }
-    return password;
+    if (includeSymbols) {
+        charSet += "!@#$%^&*()_-+=[]{};:<>?/"; // Include symbols if requested
+    }
+
+    int charSetLength = charSet.length(); // Calculate the length of the character set
+
+    // Ensure at least one character from each selected character set
+    if (includeDigits && includeLetters && includeSymbols && length > 0) {
+        randomString += charSet[rand() % 10]; // Include one digit
+        randomString += charSet[10 + rand() % 52]; // Include one letter
+        randomString += charSet[62 + rand() % 24]; // Include one symbol
+        length -= 3; // Decrease the remaining length accordingly
+    }
+
+    // Fill the remaining characters randomly from the combined character set
+    for (int i = 0; i < length; ++i) {
+        randomString += charSet[rand() % charSetLength]; // Append random characters from the character set
+    }
+    return randomString; // Return the generated password
 }
 
-// Function to evaluate password strength based on its length
+// Function to evaluate the strength of a password based on its length
 string evaluatePasswordStrength(const string& password) {
-    if (password.length() >= 12) return "Very High";
+    if (password.length() >= 12) return "Very High"; 
     else if (password.length() >= 8) return "High";
-    else return "Low";
+    else return "Low"; 
 }
 
 int main() {
-    int minLength, maxLength;
-    string charSet;
+    srand(time(0)); // Seed the random number generator with the current time
+    int length;
+    bool includeDigits, includeLetters, includeSymbols;
 
-    cout << "Enter minimum password length: ";
-    cin >> minLength;
-    cout << "Enter maximum password length: ";
-    cin >> maxLength;
-    cout << "Include letters? (y/n): ";
-    char includeLetters;
-    cin >> includeLetters;
-    
-    // Include letters
-    if (includeLetters == 'y') charSet += "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    cout << "Include digits? (y/n): ";
-    char includeDigits;
+    // Prompt the user to enter preferences for password generation
+    cout << "Enter the preferred length of the password: ";
+    cin >> length;
+
+    cout << "Do you want to include digits? (1/0): ";
     cin >> includeDigits;
-    // Include digits
-    if (includeDigits == 'y') charSet += "0123456789";
-    cout << "Include symbols? (y/n): ";
-    char includeSymbols;
-    cin >> includeSymbols;
-    // Include symbols
-    if (includeSymbols == 'y') charSet += "!@#$%^&*()_-+=[]{};:<>?/";
 
-    // If no character types are selected, exit the program
-    if (charSet.empty()) {
-        cout << "No character types selected. Exiting program.\n";
-        return 1;
+    cout << "Do you want to include letters (uppercase and lowercase)? (1/0): ";
+    cin >> includeLetters;
+
+    cout << "Do you want to include symbols? (1/0): ";
+    cin >> includeSymbols;
+
+    // Ensure at least one character set is selected
+    if (!(includeDigits || includeLetters || includeSymbols)) {
+        cout << "At least one character set must be included. Exiting..." << endl;
+        return 1; // Exit the program with an error code
     }
 
-    // Generate a password based on the provided criteria
-    string password = generatePassword(minLength, maxLength, charSet);
-
-    cout << "Generated Password: " << password << endl;
+    // Generate a random password based on user preferences
+    string password = generateRandomString(length, includeDigits, includeLetters, includeSymbols);
+    cout << "Generated password: " << password << endl;
     cout << "Password Strength: " << evaluatePasswordStrength(password) << endl;
-
     return 0;
 }
