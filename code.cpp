@@ -8,6 +8,9 @@ using namespace std;
 string generateRandomString(int length, bool includeDigits, bool includeLetters, bool includeSymbols) {
     string randomString; // Initialize an empty string to hold the generated password
     string charSet = ""; // Initialize an empty string to store the character set to be used
+    string digits = "0123456789";
+    string symbols = "!@#$%^&*()_-+=[]{};:<>?/";
+    string letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
     // Append characters to the character set based on user preferences
     if (includeDigits)
@@ -22,13 +25,17 @@ string generateRandomString(int length, bool includeDigits, bool includeLetters,
     int charSetLength = charSet.length(); // Calculate the length of the character set
 
     // Ensure at least one character from each selected character set
-    if (includeDigits && includeLetters && includeSymbols && length > 0) {
-        randomString += charSet[rand() % 10]; // Include one digit
-        randomString += charSet[10 + rand() % 52]; // Include one letter
-        randomString += charSet[62 + rand() % 24]; // Include one symbol
-        length -= 3; // Decrease the remaining length accordingly
+    if (includeDigits && length > 0) {
+        randomString += digits[rand() % digits.size()]; // Include one digit
+        length --; // Decrease the remaining length accordingly
     }
-
+    if (includeLetters &&length > 0) { 
+        randomString += letters[rand() % letters.size()];
+        length --; // Decrease the remaining length accordingly
+    }    if (includeSymbols && length > 0) {
+        randomString += symbols[rand() % symbols.size()]; // Include one symbol
+        length --; // Decrease the remaining length accordingly
+    }
     // Fill the remaining characters randomly from the combined character set
     for (int i = 0; i < length; ++i) {
         randomString += charSet[rand() % charSetLength]; // Append random characters from the character set
